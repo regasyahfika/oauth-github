@@ -11,18 +11,26 @@ function callback(req, res) {
   const options = { headers: { accept: "application/json" } };
   axios
     .post(`${config.oauthUrl}/access_token`, body, options)
-    .then((res) => resp.data["accessToken"])
+    .then((res) => res.data.access_token)
     .then((accessToken) => {
-      const user = UserServices.getUserInfo(accessToken);
-      res.json({
-        data: {
-          login: user.login,
-          githubId: user.id,
-          avatar: user.avatar_url,
-          email: user.email,
-          name: user.name,
-          location: user.location,
-        },
+      const response = UserServices.getUserInfo(accessToken);
+      response.then(function (user) {
+        res.json({
+          data: {
+            login: user[0].login,
+            githubId: user[0].id,
+            avatar: user[0].avatar_url,
+            email: user[0].email,
+            name: user[0].name,
+            location: user[0].location,
+          },
+        });
+
+        // untuk get semua data 
+        // const array = user.map(function (value, index) {
+        //   return value;
+        // });
+        // res.json({data : array});
       });
     })
     .catch((err) => res.status(500).json({ message: err.message }));
